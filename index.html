@@ -4,14 +4,14 @@
     <title>IT Quantum Game</title>
     <meta charset="utf-8" />
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <![endif]-->
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <!--<![endif]-->
-    <!-- <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/globalize/0.1.1/globalize.min.js"></script> -->
-    <script type="text/javascript" src="http://cdn3.devexpress.com/jslib/17.1.6/js/dx.viz.debug.js"></script>
-    <script type="text/javascript" src="http://cdn3.devexpress.com/jslib/17.1.6/js/vectormap-utils/dx.vectormaputils.debug.js"></script>
+    <!-- <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/globalize/0.1.1/globalize.min.js"></script> -->
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/17.1.6/js/dx.viz.debug.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/17.1.6/js/vectormap-utils/dx.vectormaputils.debug.js"></script>
 </head>
 <body>
     <script>
@@ -124,10 +124,19 @@
                                 enabled: true,
                                 dataField: 'text'
                             },
-                            color: 'red',
+                            color: 'brown',
                             type: 'area',
                             dataSource: dat.features
-                        }]
+                        }, {
+                            label: {
+                                enabled: true,
+                                dataField: 'text'
+                            },
+                            color: 'brown',
+                            type: 'area',
+                            dataSource: dat.features
+                        }
+                        ]
                     });
                 });
             });

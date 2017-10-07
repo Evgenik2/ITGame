@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>IT Quantum Game</title>
+    <meta charset="utf-8" />
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <![endif]-->
+    <!--[if gte IE 9]><!-->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <!--<![endif]-->
+    <!-- <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/globalize/0.1.1/globalize.min.js"></script> -->
+    <script type="text/javascript" src="http://cdn3.devexpress.com/jslib/17.1.6/js/dx.viz.debug.js"></script>
+    <script type="text/javascript" src="http://cdn3.devexpress.com/jslib/17.1.6/js/vectormap-utils/dx.vectormaputils.debug.js"></script>
+</head>
+<body>
+    <script>
+        function shuffle(array) {
+            var currentIndex = array.length, temporaryValue, randomIndex;
+            while (0 !== currentIndex) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+            return array;
+        }
+        function cw(x, y, p1, p2) {
+            return (x * (p1[1] - p2[1]) + p1[0] * (p2[1] - y) + p2[0] * (y - p1[1])) < 0;
+        }
+        $(function () {
+            var bound;
+            var feat;
+            var dat;
+            var quest = 0;
+            var cit = 0;
+            var scores = 0;
+            var names = shuffle(["Тула", "Белёв", "Алексин", "Узловая", "Щёкино", "Киреевск", "Венёв", "Чекалин", "Ясногорск", "Богородицк", "Ефремов", "Суворов", "Плавск", "Одоев", "Дубна", "Донской", "Куркино", "Архангельское", "Чернь"]);
+            function q() {
+                quest += 1;
+                if (quest > 10) {
+                    if (scores < 50)
+                        $("#question").text("У вас отличные знания географии Тульской области.");
+                    else if (scores < 150)
+                        $("#question").text("У вас хорошие знания географии Тульской области.");
+                    else if (scores < 250)
+                        $("#question").text("Ваши знания о Тульской области достаточно скромны.");
+                    else if (scores < 350)
+                        $("#question").text("Рекоммендуем вам подтянуть ваши знания.");
+                    else
+                        $("#question").text("Очень плохо! Вам стоит посетить эти замечательные места.");
+                } else {
+                    cit = 0;
+                    var c = feat[cit];
+                    while (names[quest - 1] !== c.properties.NAME) {
+                        cit += 1;
+                        c = feat[cit];
+                    }
+
+                    $("#question").text("Вопрос №" + quest + ": покажите где находится " + c.properties.NAME);
+                }
+            }
+            function inPol(x, y, pol) {
+                return false;
+                //var pp = pol[pol.length - 1];
+                //var r = 0;
+                //pol.forEach(function (p) {
+                //    if (cross(x, y, pp, p) != r)
+                //        r += 1;
+                //    pp = p;
+                //});
+                //return r % 2 > 0;
+            }
+            function lenTo(x, y, pol) {
+                len = 100000000;
+                pol.forEach(function (p) {
+                    var xx = (x - p[0]) * 65.544;
+                    var yy = (y - p[1]) * 111;
+                    len = Math.min(len, Math.sqrt(xx * xx + yy * yy));
+                });
+                return Math.round(len);
+            }
+            function a(x, y) {
+                if (quest > 10)
+                    return;
+                var pol = feat[cit].geometry.coordinates[0];
+                if (!inPol(x, y, pol))
+                    scores += lenTo(x, y, pol);
+                $("#scores").text("Ваша ошибка " + scores + " км.");
+                var map = $('#mapContainer').dxVectorMap('instance');
+                feat[cit].properties.attributes = { text: feat[cit].properties.NAME };
+                dat.features.push(feat[cit]);
+                var d = {};
+                Object.assign(d, dat);
+                map.option('layers[1].dataSource', d);
+                q();
+            }
+            DevExpress.viz.vectormaputils.parse('boundary-polygon', { precision: 4 }, function (boundaries) {
+                DevExpress.viz.vectormaputils.parse('settlement-polygon', { precision: 4 }, function (settelments) {
+                    feat = settelments.features;
+                    dat = settelments;
+                    dat.features = [];
+                    bound = boundaries;
+                    q();
+                    $('#mapContainer').dxVectorMap({
+                        onClick: function (e) {
+                            var coord = e.component.convertCoordinates(e.jQueryEvent.x, e.jQueryEvent.y);
+                            a(coord[0], coord[1]);
+                        },
+                        zoomingEnabled: false,
+                        panningEnabled: false,
+                        bounds: [35.5, 57.5, 39.5, 50],
+                        controlBar: {
+                            enabled: false
+                        },
+                        layers: [{
+                            type: 'area',
+                            dataSource: boundaries,
+                            hoverEnabled: false
+                        },
+                        {
+                            label: {
+                                enabled: true,
+                                dataField: 'text'
+                            },
+                            color: 'red',
+                            type: 'area',
+                            dataSource: dat.features
+                        }]
+                    });
+                });
+            });
+        });
+    </script>
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+        }
+
+        .main {
+            width: 100%;
+            height: 100%;
+            margin: 20px;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .map {
+            width: 50%;
+            display: flex;
+        }
+
+        .quest {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .header {
+            margin-bottom: 0px;
+        }
+
+        .desc {
+            margin: 30px;
+        }
+
+        .scores_container {
+            margin: 30px;
+        }
+
+        .question {
+            margin: 30px;
+        }
+    </style>
+    <div class="main">
+        <div class="quest">
+            <div class=" header"><h1>ИГРА ГОРОДА</h1></div>
+            <div class="desc"><h4>К неделе краеведения IT quantum города Тулы предлагает игру на знание географии Тульской области. Ответьте на 10 вопросов. От точности ваших ответов будет зависеть ваш итоговый результат в игре.</h4></div>
+            <div class="scores_container"><h1 id="scores"></h1></div>
+            <div class="question"><h1 id="question"></h1></div>
+        </div>
+        <div id="mapContainer" class="map" style="height:100%;width:50%;margin:0px auto"></div>
+    </div>
+</body>
+</html>
